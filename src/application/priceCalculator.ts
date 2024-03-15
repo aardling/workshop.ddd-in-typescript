@@ -1,11 +1,12 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
 import { ExternalVisitorService } from "../domain/externalTypes";
 import Price from "../domain/price";
-import { Visits } from "../domain/visits";
+import { Visit, Visits } from "../domain/visits";
 import Weight from "../domain/weight";
 
 interface CalculatePriceRequest {
   date: Date;
+  visit: Visit;
   droppedFractions: ReadonlyArray<DroppedFraction>;
   person_id: string;
   visit_id: string;
@@ -17,6 +18,11 @@ function parseCalculatePriceRequest(
 ): CalculatePriceRequest {
   return {
     date: new Date(request.date),
+    visit: new Visit(
+      new Date(request.date),
+      request.visit_id,
+      request.person_id,
+    ),
     droppedFractions: request.dropped_fractions.map(
       (d: any) =>
         new DroppedFraction(
@@ -55,7 +61,7 @@ export default class PriceCalculatorService {
       visitor!.city,
     );
 
-    this.#visits.visit(calculatePriceRequest);
+    this.#visits.visit(calculatePriceRequest.visit);
     let price = DroppedFraction.sum(calculatePriceRequest.droppedFractions);
     if (this.#visits.numberOfVisitsInCurrentMonth >= 3) {
       price = price.times(1.05);
