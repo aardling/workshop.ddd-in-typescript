@@ -11,6 +11,7 @@ export interface Visitors {
 export interface Visitor {
   personId: PersonId;
   city: string;
+  unitId: UnitId;
   type: VisitorType;
 }
 
@@ -44,6 +45,10 @@ class PrivateVisitor implements Visitor {
     this.#address = address;
     this.city = city;
   }
+  get unitId() {
+    return this.#personId;
+  }
+
   get personId() {
     return this.#personId;
   }
@@ -60,6 +65,9 @@ class BusinessVisitor implements Visitor {
     this.#personId = personId;
     this.#address = address;
     this.city = city;
+  }
+  get unitId() {
+    return `${this.#address} - ${this.city}`;
   }
   get personId() {
     return this.#personId;

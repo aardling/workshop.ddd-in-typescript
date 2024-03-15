@@ -22,7 +22,7 @@ export class InMemoryPriceCalculators implements PriceCalculators {
   }
   get(visitor: Visitor, fractionType: AllowedFractionType) {
     const key = priceKey(visitor.city, visitor.type, fractionType);
-    const visitorPriceKey: VistorPriceKey = `${visitor.personId}-${fractionType}`;
+    const visitorPriceKey: VistorPriceKey = `${visitor.unitId}-${fractionType}`;
     let calculator = this.#calculators[visitorPriceKey];
     if (!calculator) {
       const definition = this.#definitions[key];
