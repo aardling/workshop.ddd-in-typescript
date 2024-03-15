@@ -1,4 +1,5 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
+import { ExternalVisitorService } from "../domain/externalTypes";
 import Price from "../domain/price";
 import Weight from "../domain/weight";
 
@@ -33,8 +34,15 @@ function formatPrice(p: Price) {
 }
 
 export default class PriceCalculatorService {
-  calculate(request: any) {
+  #externalVisitorsService: ExternalVisitorService;
+
+  constructor(externalVisitorsService: ExternalVisitorService) {
+    this.#externalVisitorsService = externalVisitorsService;
+  }
+
+  async calculate(request: any) {
     const calculatePriceRequest = parseCalculatePriceRequest(request);
+
     const price = DroppedFraction.sum(calculatePriceRequest.droppedFractions);
 
     return {
