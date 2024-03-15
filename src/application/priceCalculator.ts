@@ -8,6 +8,7 @@ import { PersonId, Visit } from "../domain/visit";
 import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
 import { PersonalVisitHistory } from "../domain/PersonalVisitHistory";
 import Weight from "../domain/weight";
+import { PriceCalculators } from "../domain/PriceCalculation";
 
 interface CalculatePriceRequest {
   date: Date;
@@ -50,13 +51,16 @@ function formatPrice(p: Price) {
 export default class PriceCalculatorService {
   #externalVisitorsService: ExternalVisitorService;
   #personalVisitHistories: PersonalVisitHistories;
+  #priceCalculators: PriceCalculators;
 
   constructor(
     externalVisitorsService: ExternalVisitorService,
     personalVisitHistories: PersonalVisitHistories,
+    priceCalculators: PriceCalculators,
   ) {
     this.#externalVisitorsService = externalVisitorsService;
     this.#personalVisitHistories = personalVisitHistories;
+    this.#priceCalculators = priceCalculators;
   }
 
   async calculate(request: any) {
@@ -84,7 +88,10 @@ export default class PriceCalculatorService {
     let personalVisitHistory =
       this.#personalVisitHistories.getByPersonId(personId);
     if (!personalVisitHistory) {
-      personalVisitHistory = new PersonalVisitHistory(personId);
+      personalVisitHistory = new PersonalVisitHistory(
+        personId,
+        this.#priceCalculators,
+      );
     }
     return personalVisitHistory;
   }
