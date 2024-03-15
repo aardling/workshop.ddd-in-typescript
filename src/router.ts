@@ -19,6 +19,7 @@ routes.post("/calculatePrice", async (request: Request, response: Response) => {
 
   const priceCalculator = new PriceCalculatorService(
     context.externalVisitorService,
+    context.visits,
   );
   const result = await priceCalculator.calculate(request.body);
 
