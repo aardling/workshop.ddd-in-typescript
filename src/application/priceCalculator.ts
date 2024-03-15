@@ -1,14 +1,14 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
 import { ExternalVisitorService } from "../domain/externalTypes";
 import Price from "../domain/price";
-import { Visit, Visits } from "../domain/visits";
+import { PersonId, Visit } from "../domain/visit";
+import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
+import { PersonalVisitHistory } from "../domain/PersonalVisitHistory";
 import Weight from "../domain/weight";
 
 interface CalculatePriceRequest {
   date: Date;
   visit: Visit;
-  droppedFractions: ReadonlyArray<DroppedFraction>;
-  person_id: string;
   visit_id: string;
 }
 
@@ -16,17 +16,21 @@ function parseCalculatePriceRequest(
   request: any,
   city: string,
 ): CalculatePriceRequest {
+  const droppedFractions = request.dropped_fractions.map(
+    (d: any) =>
+      new DroppedFraction(
+        FractionType.fromString(d.fraction_type, city),
+        new Weight(d.amount_dropped),
+      ),
+  );
+
   return {
     date: new Date(request.date),
-    visit: new Visit(new Date(request.date), request.person_id),
-    droppedFractions: request.dropped_fractions.map(
-      (d: any) =>
-        new DroppedFraction(
-          FractionType.fromString(d.fraction_type, city),
-          new Weight(d.amount_dropped),
-        ),
+    visit: new Visit(
+      new Date(request.date),
+      request.person_id,
+      droppedFractions,
     ),
-    person_id: request.person_id,
     visit_id: request.visit_id,
   };
 }
@@ -41,11 +45,14 @@ function formatPrice(p: Price) {
 
 export default class PriceCalculatorService {
   #externalVisitorsService: ExternalVisitorService;
-  #visits: Visits;
+  #personalVisitHistories: PersonalVisitHistories;
 
-  constructor(externalVisitorsService: ExternalVisitorService, visits: Visits) {
+  constructor(
+    externalVisitorsService: ExternalVisitorService,
+    personalVisitHistories: PersonalVisitHistories,
+  ) {
     this.#externalVisitorsService = externalVisitorsService;
-    this.#visits = visits;
+    this.#personalVisitHistories = personalVisitHistories;
   }
 
   async calculate(request: any) {
@@ -57,15 +64,27 @@ export default class PriceCalculatorService {
       visitor!.city,
     );
 
-    const price = this.#visits.calculatePriceOfVisit(
-      calculatePriceRequest.visit,
-      calculatePriceRequest.droppedFractions,
+    const personalVisitHistory = this.getPersonalVisitHisotry(
+      calculatePriceRequest.visit.personId,
     );
+    const price = personalVisitHistory.calculatePriceOfVisit(
+      calculatePriceRequest.visit,
+    );
+    this.#personalVisitHistories.save(personalVisitHistory);
 
     return {
-      person_id: calculatePriceRequest.person_id,
+      person_id: calculatePriceRequest.visit.personId,
       visit_id: calculatePriceRequest.visit_id,
       ...formatPrice(price),
     };
+  }
+
+  private getPersonalVisitHisotry(personId: PersonId) {
+    let personalVisitHistory =
+      this.#personalVisitHistories.getByPersonId(personId);
+    if (!personalVisitHistory) {
+      personalVisitHistory = new PersonalVisitHistory(personId);
+    }
+    return personalVisitHistory;
   }
 }
