@@ -8,7 +8,6 @@ const routes = Router();
 routes.use(bodyParser.json());
 
 let context: Context;
-initializeContext();
 
 routes.get("/", (_request: Request, response: Response, _next) => {
   return response.json({ status: "OK" });

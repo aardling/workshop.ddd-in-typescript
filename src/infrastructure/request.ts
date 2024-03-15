@@ -13,3 +13,16 @@ export async function get(path: string) {
   });
   return await response.json();
 }
+export async function post(path: string, body: object) {
+  console.log(authToken, workshopId);
+  const response = await fetch(`${workshopServerUrl}${path}`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "x-auth-token": authToken,
+      "x-workshop-id": workshopId,
+      "content-type": "application/json",
+    },
+  });
+  return await response.json();
+}
