@@ -41,6 +41,8 @@ export class VisitHistory {
       type: "PriceWasCalculated",
       price: totalPrice,
       personId: visit.personId,
+      visitorType: visit.type,
+      email: this.#visitor.email,
     };
   }
 
