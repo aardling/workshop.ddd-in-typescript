@@ -65,22 +65,21 @@ export default class PriceCalculatorService {
     const calculatePriceRequest = parseCalculatePriceRequest(request, visitor);
 
     const visitHistory = this.getVisitHistory(visitor);
-    const price = visitHistory.calculatePriceOfVisit(
+    const calcualtedPrice = visitHistory.calculatePriceOfVisit(
       calculatePriceRequest.visit,
     );
     this.#visitHistories.save(visitHistory);
 
-    const p = await post("/api/invoice", {
+    await post("/api/invoice", {
       email: "beavers@dam-building.com",
-      invoice_currency: "EUR",
-      invoice_amount: 125.37,
+      invoice_currency: calcualtedPrice.price.value.currency,
+      invoice_amount: calcualtedPrice.price.value.amount,
     });
-    console.log(p);
 
     return {
       person_id: calculatePriceRequest.visit.personId,
       visit_id: calculatePriceRequest.visit_id,
-      ...formatPrice(price),
+      ...formatPrice(calcualtedPrice.price),
     };
   }
 
