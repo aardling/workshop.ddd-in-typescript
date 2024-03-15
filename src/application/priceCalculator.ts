@@ -6,7 +6,7 @@ import { Visitor, Visitors } from "../domain/visitor";
 import { CalculatorDefinitions } from "./initPrices";
 import { VisitHistories } from "../domain/VisitHistories";
 import { VisitHistory } from "../domain/VisitHistory";
-import { post } from "../infrastructure/request";
+import { MessageBus } from "../infrastructure/inMemoryMessageBus";
 
 interface CalculatePriceRequest {
   date: Date;
@@ -46,10 +46,16 @@ function formatPrice(p: Price) {
 export default class PriceCalculatorService {
   #visitHistories: VisitHistories;
   #visitors: Visitors;
+  #messageBus: MessageBus;
 
-  constructor(visitors: Visitors, visitHistories: VisitHistories) {
+  constructor(
+    visitors: Visitors,
+    visitHistories: VisitHistories,
+    messageBus: MessageBus,
+  ) {
     this.#visitors = visitors;
     this.#visitHistories = visitHistories;
+    this.#messageBus = messageBus;
   }
 
   async calculate(request: any) {
@@ -70,11 +76,7 @@ export default class PriceCalculatorService {
     );
     this.#visitHistories.save(visitHistory);
 
-    await post("/api/invoice", {
-      email: "beavers@dam-building.com",
-      invoice_currency: calcualtedPrice.price.value.currency,
-      invoice_amount: calcualtedPrice.price.value.amount,
-    });
+    this.#messageBus.publish(calcualtedPrice);
 
     return {
       person_id: calculatePriceRequest.visit.personId,

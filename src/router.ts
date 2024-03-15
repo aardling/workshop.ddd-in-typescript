@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import InMemoryExternalVisitorService from "./internal/inMemoryExternalVisitorService";
 import Context from "./application/context";
 import PriceCalculatorService from "./application/priceCalculator";
+import { InvoiceHandler } from "./domain/invoicing/InvoiceHandler";
 
 const routes = Router();
 routes.use(bodyParser.json());
@@ -19,6 +20,7 @@ routes.post("/calculatePrice", async (request: Request, response: Response) => {
   const priceCalculator = new PriceCalculatorService(
     context.visitors,
     context.visitHistories,
+    context.messageBus,
   );
   const result = await priceCalculator.calculate(request.body);
 
@@ -39,6 +41,8 @@ routes.post("/startScenario", (_request: Request, response: Response) => {
 
 function initializeContext() {
   context = Context.initialize(new InMemoryExternalVisitorService());
+  const invoiceHandler = new InvoiceHandler();
+  context.messageBus.subscribe(invoiceHandler.handle.bind(invoiceHandler));
 }
 
 export { routes };

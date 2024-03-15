@@ -6,6 +6,7 @@ import {
   ComposedPriceCalculatorDefinition,
 } from "./PriceCalculation";
 import { Visitor } from "./visitor";
+import { PriceWasCalculated } from "./PriceWasCalculated";
 
 export class VisitHistory {
   #visits: Array<Visit>;
@@ -25,7 +26,7 @@ export class VisitHistory {
     return this.#visitor.unitId;
   }
 
-  calculatePriceOfVisit(visit: Visit) {
+  calculatePriceOfVisit(visit: Visit): PriceWasCalculated {
     this.#visits.push(visit);
 
     let priceWithoutFee = visit.droppedFractions.reduce<Price>(
@@ -37,6 +38,7 @@ export class VisitHistory {
 
     let totalPrice = this.applyFee(visit, priceWithoutFee);
     return {
+      type: "PriceWasCalculated",
       price: totalPrice,
       personId: visit.personId,
     };
