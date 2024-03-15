@@ -1,14 +1,13 @@
+import DroppedFraction from "./droppedFraction";
+
 type PersonId = string;
-type VisitId = string;
 
 export class Visit {
   #date: Date;
-  #visitId: string;
   #personId: string;
 
-  constructor(date: Date, visitId: VisitId, personId: PersonId) {
+  constructor(date: Date, personId: PersonId) {
     this.#date = date;
-    this.#visitId = visitId;
     this.#personId = personId;
   }
 
@@ -24,8 +23,17 @@ export class Visit {
 export class Visits {
   #visits: Array<Visit> = [];
 
-  visit(visit: Visit) {
+  calculatePriceOfVisit(
+    visit: Visit,
+    droppedFractions: ReadonlyArray<DroppedFraction>,
+  ) {
     this.#visits.push(visit);
+
+    let price = DroppedFraction.sum(droppedFractions);
+    if (this.numberOfVisitsInCurrentMonth >= 3) {
+      price = price.times(1.05);
+    }
+    return price;
   }
 
   get numberOfVisitsInCurrentMonth() {

@@ -18,11 +18,7 @@ function parseCalculatePriceRequest(
 ): CalculatePriceRequest {
   return {
     date: new Date(request.date),
-    visit: new Visit(
-      new Date(request.date),
-      request.visit_id,
-      request.person_id,
-    ),
+    visit: new Visit(new Date(request.date), request.person_id),
     droppedFractions: request.dropped_fractions.map(
       (d: any) =>
         new DroppedFraction(
@@ -61,11 +57,10 @@ export default class PriceCalculatorService {
       visitor!.city,
     );
 
-    this.#visits.visit(calculatePriceRequest.visit);
-    let price = DroppedFraction.sum(calculatePriceRequest.droppedFractions);
-    if (this.#visits.numberOfVisitsInCurrentMonth >= 3) {
-      price = price.times(1.05);
-    }
+    const price = this.#visits.calculatePriceOfVisit(
+      calculatePriceRequest.visit,
+      calculatePriceRequest.droppedFractions,
+    );
 
     return {
       person_id: calculatePriceRequest.person_id,
