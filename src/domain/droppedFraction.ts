@@ -24,12 +24,14 @@ export class FractionType {
     this.#type = type;
     this.#price = prices[type];
   }
+
   static fromString(type: string): FractionType {
     if (!isAllowedFractionType(type)) {
       throw new Error(`Invalid fraction type: ${type}`);
     }
     return new FractionType(type);
   }
+
   get price() {
     return this.#price;
   }
@@ -44,7 +46,15 @@ export default class DroppedFraction {
     this.#weight = weight;
   }
 
-  calculatePrice(): Price {
+  private calculatePrice(): Price {
     return this.#fractionType.price.times(this.#weight.amount);
+  }
+
+  static sum(droppedFractions: ReadonlyArray<DroppedFraction>): Price {
+    return droppedFractions.reduce<Price>(
+      (price: Price, droppedFraction: DroppedFraction) =>
+        price.add(droppedFraction.calculatePrice()),
+      new Price(0, Currency.EUR),
+    );
   }
 }

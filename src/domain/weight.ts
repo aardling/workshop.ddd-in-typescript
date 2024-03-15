@@ -7,9 +7,6 @@ export default class Weight {
     }
     this.#amount = amount;
   }
-  static fromJson(amount: number, _unit: "KG") {
-    return new Weight(amount);
-  }
 
   equal(other: Weight) {
     return other.#amount === this.#amount;

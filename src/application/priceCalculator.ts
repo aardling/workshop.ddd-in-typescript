@@ -1,5 +1,5 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
-import Price, { Currency } from "../domain/price";
+import Price from "../domain/price";
 import Weight from "../domain/weight";
 
 interface CalculatePriceRequest {
@@ -16,7 +16,7 @@ function parseCalculatePriceRequest(request: any): CalculatePriceRequest {
       (d: any) =>
         new DroppedFraction(
           FractionType.fromString(d.fraction_type),
-          Weight.fromJson(d.amount_dropped, "KG"),
+          new Weight(d.amount_dropped),
         ),
     ),
     person_id: request.person_id,
@@ -35,11 +35,7 @@ function formatPrice(p: Price) {
 export default class PriceCalculatorService {
   calculate(request: any) {
     const calculatePriceRequest = parseCalculatePriceRequest(request);
-    const price = calculatePriceRequest.droppedFractions.reduce<Price>(
-      (price: Price, droppedFraction: DroppedFraction) =>
-        price.add(droppedFraction.calculatePrice()),
-      new Price(0, Currency.EUR),
-    );
+    const price = DroppedFraction.sum(calculatePriceRequest.droppedFractions);
 
     return {
       person_id: calculatePriceRequest.person_id,
