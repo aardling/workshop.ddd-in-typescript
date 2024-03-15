@@ -1,16 +1,19 @@
 import DroppedFraction, { AllowedFractionType } from "./droppedFraction";
+import { ExternalVisitorType } from "./externalTypes";
 import Price from "./price";
 
 export interface PriceCalculator {
   calculate(droppedFraction: DroppedFraction): Price;
 }
 
-export type PriceKey = `${AllowedFractionType}_${string}`;
+export type PriceKey =
+  `${AllowedFractionType}_${ExternalVisitorType}_${string}`;
 export function priceKey(
   city: string,
+  vistorType: ExternalVisitorType,
   fractionType: AllowedFractionType,
 ): PriceKey {
-  return `${fractionType}_${city}`;
+  return `${fractionType}_${vistorType}_${city}`;
 }
 
 export interface PriceCalculators {

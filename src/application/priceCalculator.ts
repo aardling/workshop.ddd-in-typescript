@@ -4,7 +4,7 @@ import {
   ExternalVisitorService,
 } from "../domain/externalTypes";
 import Price from "../domain/price";
-import { PersonId, Visit } from "../domain/visit";
+import { Visit } from "../domain/visit";
 import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
 import { PersonalVisitHistory } from "../domain/PersonalVisitHistory";
 import Weight from "../domain/weight";
@@ -69,9 +69,7 @@ export default class PriceCalculatorService {
     );
     const calculatePriceRequest = parseCalculatePriceRequest(request, visitor!);
 
-    const personalVisitHistory = this.getPersonalVisitHistory(
-      calculatePriceRequest.visit.personId,
-    );
+    const personalVisitHistory = this.getPersonalVisitHistory(visitor!);
     const price = personalVisitHistory.calculatePriceOfVisit(
       calculatePriceRequest.visit,
     );
@@ -84,12 +82,13 @@ export default class PriceCalculatorService {
     };
   }
 
-  private getPersonalVisitHistory(personId: PersonId) {
-    let personalVisitHistory =
-      this.#personalVisitHistories.getByPersonId(personId);
+  private getPersonalVisitHistory(externalVisitor: ExternalVisitor) {
+    let personalVisitHistory = this.#personalVisitHistories.getByPersonId(
+      externalVisitor.id,
+    );
     if (!personalVisitHistory) {
       personalVisitHistory = new PersonalVisitHistory(
-        personId,
+        externalVisitor,
         this.#priceCalculators,
       );
     }

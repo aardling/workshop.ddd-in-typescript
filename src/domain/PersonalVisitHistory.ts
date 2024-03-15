@@ -2,20 +2,24 @@ import DroppedFraction from "./droppedFraction";
 import Price, { Currency } from "./price";
 import { PersonId, Visit } from "./visit";
 import { PriceCalculators, priceKey } from "./PriceCalculation";
+import { ExternalVisitor } from "./externalTypes";
 
 export class PersonalVisitHistory {
-  #personId: PersonId;
   #visits: Array<Visit>;
   #priceCalculators: PriceCalculators;
+  #externalVisitor: ExternalVisitor;
 
-  constructor(personId: PersonId, priceCalculators: PriceCalculators) {
-    this.#personId = personId;
+  constructor(
+    externalVisitor: ExternalVisitor,
+    priceCalculators: PriceCalculators,
+  ) {
+    this.#externalVisitor = externalVisitor;
     this.#visits = [];
     this.#priceCalculators = priceCalculators;
   }
 
   get person() {
-    return this.#personId;
+    return this.#externalVisitor.id;
   }
 
   calculatePriceOfVisit(visit: Visit) {
@@ -24,7 +28,11 @@ export class PersonalVisitHistory {
     let price = visit.droppedFractions.reduce<Price>(
       (price: Price, droppedFraction: DroppedFraction) => {
         let calculator = this.#priceCalculators.find(
-          priceKey(visit.city, droppedFraction.type),
+          priceKey(
+            visit.city,
+            this.#externalVisitor.type,
+            droppedFraction.type,
+          ),
         );
         return price.add(calculator.calculate(droppedFraction));
       },
