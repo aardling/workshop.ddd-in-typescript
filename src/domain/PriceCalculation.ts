@@ -2,7 +2,7 @@ import DroppedFraction, {
   AllowedFractionType,
   FractionType,
 } from "./droppedFraction";
-import { ExternalVisitorType } from "./externalTypes";
+import { ExternalVisitor, ExternalVisitorType } from "./externalTypes";
 import Price from "./price";
 import Weight from "./weight";
 
@@ -20,15 +20,32 @@ export function priceKey(
   return `${fractionType}_${vistorType}_${city}`;
 }
 
+export type PriceCalculatorFixedPriceDefinition = {
+  pricePerKg: Price;
+};
+
+export type PriceCalculatorWithExcemtpionsDefinition = {
+  weightLimit: number;
+  firstCalculator: PriceCalculatorFixedPriceDefinition;
+  secondCalculator: PriceCalculatorFixedPriceDefinition;
+};
+
+export type PriceCalculatorDefinition =
+  | PriceCalculatorFixedPriceDefinition
+  | PriceCalculatorWithExcemtpionsDefinition;
+
 export interface PriceCalculators {
-  add: (key: PriceKey, calculator: PriceCalculator) => void;
-  find: (key: PriceKey) => PriceCalculator;
+  add: (key: PriceKey, calculatorDefinition: PriceCalculatorDefinition) => void;
+  get: (
+    visitor: ExternalVisitor,
+    fractionType: AllowedFractionType,
+  ) => PriceCalculator;
 }
 
-export class DefaultPriceCalculator implements PriceCalculator {
+export class PriceCalculatorFixedPrice implements PriceCalculator {
   readonly #pricePerKg: Price;
-  constructor(pricePerKg: Price) {
-    this.#pricePerKg = pricePerKg;
+  constructor(definition: PriceCalculatorFixedPriceDefinition) {
+    this.#pricePerKg = definition.pricePerKg;
   }
 
   calculate(droppedFraction: DroppedFraction) {
@@ -42,14 +59,14 @@ export class PriceCalculatorWithExcemptions implements PriceCalculator {
   #secondPriceCalculator: PriceCalculator;
   #currentWeightDropped: number;
 
-  constructor(
-    weightLimit: number,
-    firstPriceCalculator: PriceCalculator,
-    secondPriceCalculator: PriceCalculator,
-  ) {
-    this.#weightLimit = weightLimit;
-    this.#firstPriceCalculator = firstPriceCalculator;
-    this.#secondPriceCalculator = secondPriceCalculator;
+  constructor(definition: PriceCalculatorWithExcemtpionsDefinition) {
+    this.#weightLimit = definition.weightLimit;
+    this.#firstPriceCalculator = new PriceCalculatorFixedPrice(
+      definition.firstCalculator,
+    );
+    this.#secondPriceCalculator = new PriceCalculatorFixedPrice(
+      definition.secondCalculator,
+    );
     this.#currentWeightDropped = 0;
   }
 
