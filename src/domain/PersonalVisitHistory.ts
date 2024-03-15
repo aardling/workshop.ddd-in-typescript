@@ -36,7 +36,7 @@ export class PersonalVisitHistory {
       new Price(0, Currency.EUR),
     );
 
-    if (this.numberOfVisitsInCurrentMonth >= 3) {
+    if (visit.type === "private" && this.numberOfVisitsInCurrentMonth >= 3) {
       price = price.times(1.05);
     }
     return price;
