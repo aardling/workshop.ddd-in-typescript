@@ -6,6 +6,7 @@ import { Visitor, Visitors } from "../domain/visitor";
 import { CalculatorDefinitions } from "./initPrices";
 import { VisitHistories } from "../domain/VisitHistories";
 import { VisitHistory } from "../domain/VisitHistory";
+import { post } from "../infrastructure/request";
 
 interface CalculatePriceRequest {
   date: Date;
@@ -68,6 +69,13 @@ export default class PriceCalculatorService {
       calculatePriceRequest.visit,
     );
     this.#visitHistories.save(visitHistory);
+
+    const p = await post("/api/invoice", {
+      email: "beavers@dam-building.com",
+      invoice_currency: "EUR",
+      invoice_amount: 125.37,
+    });
+    console.log(p);
 
     return {
       person_id: calculatePriceRequest.visit.personId,
