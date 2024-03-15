@@ -10,13 +10,16 @@ interface CalculatePriceRequest {
   visit_id: string;
 }
 
-function parseCalculatePriceRequest(request: any): CalculatePriceRequest {
+function parseCalculatePriceRequest(
+  request: any,
+  city: string,
+): CalculatePriceRequest {
   return {
     date: request.date,
     droppedFractions: request.dropped_fractions.map(
       (d: any) =>
         new DroppedFraction(
-          FractionType.fromString(d.fraction_type),
+          FractionType.fromString(d.fraction_type, city),
           new Weight(d.amount_dropped),
         ),
     ),
@@ -41,7 +44,13 @@ export default class PriceCalculatorService {
   }
 
   async calculate(request: any) {
-    const calculatePriceRequest = parseCalculatePriceRequest(request);
+    const visitor = await this.#externalVisitorsService.getVisitorById(
+      request.person_id,
+    );
+    const calculatePriceRequest = parseCalculatePriceRequest(
+      request,
+      visitor!.city,
+    );
 
     const price = DroppedFraction.sum(calculatePriceRequest.droppedFractions);
 
