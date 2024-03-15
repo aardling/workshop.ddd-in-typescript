@@ -1,13 +1,13 @@
 import { ExternalVisitorService } from "../domain/externalTypes";
-import { Visits } from "../domain/visits";
+import { InMemoryPersonalVisitHistories } from "../infrastructure/inMemoryPersonalVisitHistories";
 
 export default class Context {
   readonly externalVisitorService: ExternalVisitorService;
-  readonly visits: Visits;
+  readonly visistsPerPersonRepo: InMemoryPersonalVisitHistories;
 
   private constructor(externalVisitorService: ExternalVisitorService) {
     this.externalVisitorService = externalVisitorService;
-    this.visits = new Visits();
+    this.visistsPerPersonRepo = new InMemoryPersonalVisitHistories();
   }
 
   // On every new scenario the context is initialized.
