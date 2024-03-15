@@ -1,4 +1,8 @@
-import { DefaultPriceCalculator, priceKey } from "../domain/PriceCalculation";
+import {
+  DefaultPriceCalculator,
+  PriceCalculatorWithExcemptions,
+  priceKey,
+} from "../domain/PriceCalculation";
 import Price, { Currency } from "../domain/price";
 import { InMemoryPriceCalculators } from "../infrastructure/inMemoryPriceCalculators";
 
@@ -30,7 +34,11 @@ export default function initPrices() {
   );
   priceCalculators.add(
     priceKey("Oak City", "business", "Construction waste"),
-    new DefaultPriceCalculator(new Price(0.21, Currency.EUR)),
+    new PriceCalculatorWithExcemptions(
+      1000,
+      new DefaultPriceCalculator(new Price(0.21, Currency.EUR)),
+      new DefaultPriceCalculator(new Price(0.29, Currency.EUR)),
+    ),
   );
   priceCalculators.add(
     priceKey("Oak City", "business", "Green waste"),
