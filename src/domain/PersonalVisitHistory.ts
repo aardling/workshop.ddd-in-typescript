@@ -25,7 +25,7 @@ export class PersonalVisitHistory {
   calculatePriceOfVisit(visit: Visit) {
     this.#visits.push(visit);
 
-    let price = visit.droppedFractions.reduce<Price>(
+    let priceWithoutFee = visit.droppedFractions.reduce<Price>(
       (price: Price, droppedFraction: DroppedFraction) => {
         let calculator = this.#priceCalculators.get(
           this.#externalVisitor,
@@ -36,6 +36,11 @@ export class PersonalVisitHistory {
       new Price(0, Currency.EUR),
     );
 
+    let totalPrice = this.applyFee(visit, priceWithoutFee);
+    return totalPrice;
+  }
+
+  private applyFee(visit: Visit, price: Price) {
     if (visit.type === "private" && this.numberOfVisitsInCurrentMonth >= 3) {
       price = price.times(1.05);
     }

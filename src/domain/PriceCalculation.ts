@@ -40,6 +40,7 @@ export interface PriceCalculators {
     visitor: ExternalVisitor,
     fractionType: AllowedFractionType,
   ) => PriceCalculator;
+  save: (priceCalculator: PriceCalculator) => void;
 }
 
 export class PriceCalculatorFixedPrice implements PriceCalculator {

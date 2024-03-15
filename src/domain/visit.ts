@@ -5,18 +5,15 @@ export type PersonId = string;
 
 export class Visit {
   #date: Date;
-  #personId: string;
   #visitor: ExternalVisitor;
   #droppedFractions: ReadonlyArray<DroppedFraction>;
 
   constructor(
     date: Date,
-    personId: PersonId,
     visitor: ExternalVisitor,
     droppedFractions: ReadonlyArray<DroppedFraction>,
   ) {
     this.#date = date;
-    this.#personId = personId;
     this.#visitor = visitor;
     this.#droppedFractions = droppedFractions;
   }
@@ -26,7 +23,7 @@ export class Visit {
   }
 
   get personId() {
-    return this.#personId;
+    return this.#visitor.id;
   }
 
   get city() {
@@ -39,7 +36,7 @@ export class Visit {
 
   inSameMonth(other: Visit) {
     return (
-      this.#personId === other.#personId &&
+      this.personId === other.personId &&
       this.#date.getFullYear() === other.#date.getFullYear() &&
       this.#date.getMonth() === other.#date.getMonth()
     );
