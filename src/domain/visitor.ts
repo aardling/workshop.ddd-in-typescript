@@ -13,6 +13,7 @@ export interface Visitor {
   city: string;
   unitId: UnitId;
   type: VisitorType;
+  email?: string;
 }
 
 export function fromExternalVisitor(externalVisitor: ExternalVisitor) {
@@ -28,6 +29,7 @@ export function fromExternalVisitor(externalVisitor: ExternalVisitor) {
         externalVisitor.id,
         externalVisitor.address,
         externalVisitor.city,
+        externalVisitor.email,
       );
     default:
       throw new Error(
@@ -61,10 +63,19 @@ class BusinessVisitor implements Visitor {
   #personId: PersonId;
   #address: string;
   readonly city: string;
-  constructor(personId: PersonId, address: string, city: string) {
+  readonly email: string;
+
+  constructor(
+    personId: PersonId,
+    address: string,
+    city: string,
+    email: string | undefined,
+  ) {
     this.#personId = personId;
     this.#address = address;
     this.city = city;
+    if (!email) console.error("Business customers needs an email");
+    this.email = email ? email : "fallback-internal@ddd-in-lang-support.eu";
   }
   get unitId() {
     return `${this.#address} - ${this.city}`;
