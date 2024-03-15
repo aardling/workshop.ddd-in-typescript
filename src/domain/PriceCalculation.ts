@@ -2,7 +2,7 @@ import DroppedFraction, {
   AllowedFractionType,
   FractionType,
 } from "./droppedFraction";
-import { ExternalVisitor, ExternalVisitorType } from "./externalTypes";
+import { ExternalVisitorType } from "./externalTypes";
 import Price from "./price";
 import { Visitor } from "./visitor";
 import Weight from "./weight";
@@ -11,8 +11,10 @@ export interface PriceCalculator {
   calculate(droppedFraction: DroppedFraction): Price;
 }
 
+// FIXME
 export type PriceKey =
   `${AllowedFractionType}_${ExternalVisitorType}_${string}`;
+
 export function priceKey(
   city: string,
   vistorType: ExternalVisitorType,
@@ -31,14 +33,41 @@ export type PriceCalculatorWithExcemtpionsDefinition = {
   secondCalculator: PriceCalculatorFixedPriceDefinition;
 };
 
+export type ComposedPriceCalculatorDefinition = {
+  calculatorForConstruction: PriceCalculatorDefinition;
+  calculatorForGreen: PriceCalculatorDefinition;
+};
+
 export type PriceCalculatorDefinition =
   | PriceCalculatorFixedPriceDefinition
   | PriceCalculatorWithExcemtpionsDefinition;
 
-export interface PriceCalculators {
-  add: (key: PriceKey, calculatorDefinition: PriceCalculatorDefinition) => void;
-  get: (visitor: Visitor, fractionType: AllowedFractionType) => PriceCalculator;
-  save: (priceCalculator: PriceCalculator) => void;
+export class ComposedPriceCalculator {
+  #construction: PriceCalculator;
+  #green: PriceCalculator;
+
+  constructor(definition: ComposedPriceCalculatorDefinition) {
+    this.#construction = this.newPriceCalculator(
+      definition.calculatorForConstruction,
+    );
+    this.#green = this.newPriceCalculator(definition.calculatorForGreen);
+  }
+  calculate(droppedFraction: DroppedFraction) {
+    switch (droppedFraction.type) {
+      case "Construction waste":
+        return this.#construction.calculate(droppedFraction);
+      case "Green waste":
+        return this.#green.calculate(droppedFraction);
+    }
+  }
+
+  private newPriceCalculator(definition: PriceCalculatorDefinition) {
+    if ("pricePerKg" in definition) {
+      return new PriceCalculatorFixedPrice(definition);
+    } else {
+      return new PriceCalculatorWithExcemptions(definition);
+    }
+  }
 }
 
 export class PriceCalculatorFixedPrice implements PriceCalculator {
