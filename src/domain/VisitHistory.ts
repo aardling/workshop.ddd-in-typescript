@@ -36,7 +36,10 @@ export class VisitHistory {
     );
 
     let totalPrice = this.applyFee(visit, priceWithoutFee);
-    return totalPrice;
+    return {
+      price: totalPrice,
+      personId: visit.personId,
+    };
   }
 
   private applyFee(visit: Visit, price: Price) {
