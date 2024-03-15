@@ -21,6 +21,17 @@ export default class Price {
     assert(this.#currency === other.#currency, "The currencies don't match");
     return new Price(this.#amount + other.#amount, this.#currency);
   }
+
+  times(factor: number): Price {
+    return new Price(this.#amount * factor, this.#currency);
+  }
+
+  get value() {
+    return {
+      amount: this.#amount,
+      currency: Currency[this.#currency],
+    };
+  }
 }
 
 function assert(assertion: boolean, message: string) {
