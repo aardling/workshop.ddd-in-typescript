@@ -1,19 +1,23 @@
 import DroppedFraction from "./droppedFraction";
+import { ExternalVisitor } from "./externalTypes";
 
 export type PersonId = string;
 
 export class Visit {
   #date: Date;
   #personId: string;
+  #visitor: ExternalVisitor;
   #droppedFractions: ReadonlyArray<DroppedFraction>;
 
   constructor(
     date: Date,
     personId: PersonId,
-    droppedFractions: ReadonlyArray<DroppedFraction>
+    visitor: ExternalVisitor,
+    droppedFractions: ReadonlyArray<DroppedFraction>,
   ) {
     this.#date = date;
     this.#personId = personId;
+    this.#visitor = visitor;
     this.#droppedFractions = droppedFractions;
   }
 
@@ -21,8 +25,12 @@ export class Visit {
     return this.#personId;
   }
 
-  price() {
-    return DroppedFraction.sum(this.#droppedFractions);
+  get city() {
+    return this.#visitor.city;
+  }
+
+  get droppedFractions() {
+    return this.#droppedFractions;
   }
 
   inSameMonth(other: Visit) {

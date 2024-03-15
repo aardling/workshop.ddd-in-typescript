@@ -1,5 +1,7 @@
+export type ExternalVisitorType = "private" | "business";
+
 export type ExternalVisitor = {
-  type: "private" | "business";
+  type: ExternalVisitorType;
   id: string;
   address: string;
   city: string;
