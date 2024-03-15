@@ -3,11 +3,11 @@ import { InMemoryPersonalVisitHistories } from "../infrastructure/inMemoryPerson
 
 export default class Context {
   readonly externalVisitorService: ExternalVisitorService;
-  readonly visistsPerPersonRepo: InMemoryPersonalVisitHistories;
+  readonly personalVisitHistories: InMemoryPersonalVisitHistories;
 
   private constructor(externalVisitorService: ExternalVisitorService) {
     this.externalVisitorService = externalVisitorService;
-    this.visistsPerPersonRepo = new InMemoryPersonalVisitHistories();
+    this.personalVisitHistories = new InMemoryPersonalVisitHistories();
   }
 
   // On every new scenario the context is initialized.

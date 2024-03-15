@@ -1,5 +1,8 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
-import { ExternalVisitorService } from "../domain/externalTypes";
+import {
+  ExternalVisitor,
+  ExternalVisitorService,
+} from "../domain/externalTypes";
 import Price from "../domain/price";
 import { PersonId, Visit } from "../domain/visit";
 import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
@@ -14,12 +17,12 @@ interface CalculatePriceRequest {
 
 function parseCalculatePriceRequest(
   request: any,
-  city: string,
+  externalVisitor: ExternalVisitor,
 ): CalculatePriceRequest {
   const droppedFractions = request.dropped_fractions.map(
     (d: any) =>
       new DroppedFraction(
-        FractionType.fromString(d.fraction_type, city),
+        FractionType.fromString(d.fraction_type),
         new Weight(d.amount_dropped),
       ),
   );
@@ -29,6 +32,7 @@ function parseCalculatePriceRequest(
     visit: new Visit(
       new Date(request.date),
       request.person_id,
+      externalVisitor,
       droppedFractions,
     ),
     visit_id: request.visit_id,
@@ -59,12 +63,9 @@ export default class PriceCalculatorService {
     const visitor = await this.#externalVisitorsService.getVisitorById(
       request.person_id,
     );
-    const calculatePriceRequest = parseCalculatePriceRequest(
-      request,
-      visitor!.city,
-    );
+    const calculatePriceRequest = parseCalculatePriceRequest(request, visitor!);
 
-    const personalVisitHistory = this.getPersonalVisitHisotry(
+    const personalVisitHistory = this.getPersonalVisitHistory(
       calculatePriceRequest.visit.personId,
     );
     const price = personalVisitHistory.calculatePriceOfVisit(
@@ -79,7 +80,7 @@ export default class PriceCalculatorService {
     };
   }
 
-  private getPersonalVisitHisotry(personId: PersonId) {
+  private getPersonalVisitHistory(personId: PersonId) {
     let personalVisitHistory =
       this.#personalVisitHistories.getByPersonId(personId);
     if (!personalVisitHistory) {
