@@ -1,38 +1,21 @@
 import DroppedFraction, { AllowedFractionType } from "./droppedFraction";
 import Price from "./price";
 
-interface PriceCalculator {
+export interface PriceCalculator {
   calculate(droppedFraction: DroppedFraction): Price;
 }
 
-type PriceKey = `${AllowedFractionType}_${string}`;
-
-export class PriceQuery {
-  readonly #city: string;
-  readonly #fractionType: AllowedFractionType;
-
-  constructor(city: string, fractionType: AllowedFractionType) {
-    this.#city = city;
-    this.#fractionType = fractionType;
-  }
-
-  toKey(): PriceKey {
-    return `${this.#fractionType}_${this.#city}`;
-  }
+export type PriceKey = `${AllowedFractionType}_${string}`;
+export function priceKey(
+  city: string,
+  fractionType: AllowedFractionType,
+): PriceKey {
+  return `${fractionType}_${city}`;
 }
 
-export class Prices {
-  readonly #prices: { [key: PriceKey]: PriceCalculator } = {};
-
-  constructor() {}
-
-  add(key: PriceKey, calculator: PriceCalculator) {
-    this.#prices[key] = calculator;
-  }
-
-  find(query: PriceQuery): PriceCalculator {
-    return this.#prices[query.toKey()];
-  }
+export interface PriceCalculators {
+  add: (key: PriceKey, calculator: PriceCalculator) => void;
+  find: (key: PriceKey) => PriceCalculator;
 }
 
 export class DefaultPriceCalculator implements PriceCalculator {
