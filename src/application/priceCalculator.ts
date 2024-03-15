@@ -1,17 +1,19 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
 import Price from "../domain/price";
 import { Visit } from "../domain/visit";
-import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
-import { PersonalVisitHistory } from "../domain/PersonalVisitHistory";
 import Weight from "../domain/weight";
-import { PriceCalculators } from "../domain/PriceCalculation";
 import { Visitor, Visitors } from "../domain/visitor";
+import { CalculatorDefinitions } from "./initPrices";
+import { VisitHistories } from "../domain/VisitHistories";
+import { VisitHistory } from "../domain/VisitHistory";
 
 interface CalculatePriceRequest {
   date: Date;
   visit: Visit;
   visit_id: string;
 }
+
+const calculatorDefinitions = new CalculatorDefinitions();
 
 function parseCalculatePriceRequest(
   request: any,
@@ -41,18 +43,12 @@ function formatPrice(p: Price) {
 }
 
 export default class PriceCalculatorService {
-  #personalVisitHistories: PersonalVisitHistories;
-  #priceCalculators: PriceCalculators;
+  #visitHistories: VisitHistories;
   #visitors: Visitors;
 
-  constructor(
-    visitors: Visitors,
-    personalVisitHistories: PersonalVisitHistories,
-    priceCalculators: PriceCalculators,
-  ) {
+  constructor(visitors: Visitors, visitHistories: VisitHistories) {
     this.#visitors = visitors;
-    this.#personalVisitHistories = personalVisitHistories;
-    this.#priceCalculators = priceCalculators;
+    this.#visitHistories = visitHistories;
   }
 
   async calculate(request: any) {
@@ -67,11 +63,11 @@ export default class PriceCalculatorService {
 
     const calculatePriceRequest = parseCalculatePriceRequest(request, visitor);
 
-    const personalVisitHistory = this.getPersonalVisitHistory(visitor);
-    const price = personalVisitHistory.calculatePriceOfVisit(
+    const visitHistory = this.getVisitHistory(visitor);
+    const price = visitHistory.calculatePriceOfVisit(
       calculatePriceRequest.visit,
     );
-    this.#personalVisitHistories.save(personalVisitHistory);
+    this.#visitHistories.save(visitHistory);
 
     return {
       person_id: calculatePriceRequest.visit.personId,
@@ -80,16 +76,14 @@ export default class PriceCalculatorService {
     };
   }
 
-  private getPersonalVisitHistory(visitor: Visitor) {
-    let personalVisitHistory = this.#personalVisitHistories.getByPersonId(
-      visitor.personId,
-    );
-    if (!personalVisitHistory) {
-      personalVisitHistory = new PersonalVisitHistory(
+  private getVisitHistory(visitor: Visitor) {
+    let visitHistory = this.#visitHistories.getByUnitId(visitor.unitId);
+    if (!visitHistory) {
+      visitHistory = new VisitHistory(
         visitor,
-        this.#priceCalculators,
+        calculatorDefinitions.find(visitor),
       );
     }
-    return personalVisitHistory;
+    return visitHistory;
   }
 }
