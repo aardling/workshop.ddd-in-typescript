@@ -35,4 +35,13 @@ export class InMemoryPriceCalculators implements PriceCalculators {
     }
     return calculator;
   }
+
+  save(_: PriceCalculator) {
+    // this is a no-op because the in memory calculators are already updated
+    // to better simulate a real repo, we should clone the price calculator
+    // before returning it in the `get` method, but that's not trivial
+    // with javascript classess.
+    // we could implement a clone method on the PriceCalculators, but that
+    // would only be needed because of this implementation detail...
+  }
 }

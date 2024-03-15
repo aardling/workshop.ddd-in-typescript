@@ -30,12 +30,7 @@ function parseCalculatePriceRequest(
 
   return {
     date: new Date(request.date),
-    visit: new Visit(
-      new Date(request.date),
-      request.person_id,
-      externalVisitor,
-      droppedFractions,
-    ),
+    visit: new Visit(new Date(request.date), externalVisitor, droppedFractions),
     visit_id: request.visit_id,
   };
 }
