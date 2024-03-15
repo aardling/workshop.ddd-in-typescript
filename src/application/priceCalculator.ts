@@ -1,14 +1,11 @@
 import DroppedFraction, { FractionType } from "../domain/droppedFraction";
-import {
-  ExternalVisitor,
-  ExternalVisitorService,
-} from "../domain/externalTypes";
 import Price from "../domain/price";
 import { Visit } from "../domain/visit";
 import { PersonalVisitHistories } from "../domain/PersonalVisitHistories";
 import { PersonalVisitHistory } from "../domain/PersonalVisitHistory";
 import Weight from "../domain/weight";
 import { PriceCalculators } from "../domain/PriceCalculation";
+import { Visitor, Visitors } from "../domain/visitor";
 
 interface CalculatePriceRequest {
   date: Date;
@@ -18,7 +15,7 @@ interface CalculatePriceRequest {
 
 function parseCalculatePriceRequest(
   request: any,
-  externalVisitor: ExternalVisitor,
+  visitor: Visitor,
 ): CalculatePriceRequest {
   const droppedFractions = request.dropped_fractions.map(
     (d: any) =>
@@ -30,7 +27,7 @@ function parseCalculatePriceRequest(
 
   return {
     date: new Date(request.date),
-    visit: new Visit(new Date(request.date), externalVisitor, droppedFractions),
+    visit: new Visit(new Date(request.date), visitor, droppedFractions),
     visit_id: request.visit_id,
   };
 }
@@ -44,27 +41,33 @@ function formatPrice(p: Price) {
 }
 
 export default class PriceCalculatorService {
-  #externalVisitorsService: ExternalVisitorService;
   #personalVisitHistories: PersonalVisitHistories;
   #priceCalculators: PriceCalculators;
+  #visitors: Visitors;
 
   constructor(
-    externalVisitorsService: ExternalVisitorService,
+    visitors: Visitors,
     personalVisitHistories: PersonalVisitHistories,
     priceCalculators: PriceCalculators,
   ) {
-    this.#externalVisitorsService = externalVisitorsService;
+    this.#visitors = visitors;
     this.#personalVisitHistories = personalVisitHistories;
     this.#priceCalculators = priceCalculators;
   }
 
   async calculate(request: any) {
-    const visitor = await this.#externalVisitorsService.getVisitorById(
+    const visitor = await this.#visitors.getVisitorByPersonId(
       request.person_id,
     );
-    const calculatePriceRequest = parseCalculatePriceRequest(request, visitor!);
+    if (!visitor) {
+      throw new Error(
+        `The visitor with id ${request.person_id} was not found.`,
+      );
+    }
 
-    const personalVisitHistory = this.getPersonalVisitHistory(visitor!);
+    const calculatePriceRequest = parseCalculatePriceRequest(request, visitor);
+
+    const personalVisitHistory = this.getPersonalVisitHistory(visitor);
     const price = personalVisitHistory.calculatePriceOfVisit(
       calculatePriceRequest.visit,
     );
@@ -77,13 +80,13 @@ export default class PriceCalculatorService {
     };
   }
 
-  private getPersonalVisitHistory(externalVisitor: ExternalVisitor) {
+  private getPersonalVisitHistory(visitor: Visitor) {
     let personalVisitHistory = this.#personalVisitHistories.getByPersonId(
-      externalVisitor.id,
+      visitor.personId,
     );
     if (!personalVisitHistory) {
       personalVisitHistory = new PersonalVisitHistory(
-        externalVisitor,
+        visitor,
         this.#priceCalculators,
       );
     }

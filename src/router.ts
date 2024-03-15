@@ -19,7 +19,7 @@ routes.post("/calculatePrice", async (request: Request, response: Response) => {
   console.log("request: ", request.body);
 
   const priceCalculator = new PriceCalculatorService(
-    context.externalVisitorService,
+    context.visitors,
     context.personalVisitHistories,
     context.priceCalculators,
   );
