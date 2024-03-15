@@ -21,6 +21,10 @@ export class Visit {
     this.#droppedFractions = droppedFractions;
   }
 
+  get type() {
+    return this.#visitor.type;
+  }
+
   get personId() {
     return this.#personId;
   }
