@@ -1,16 +1,17 @@
 import DroppedFraction from "./droppedFraction";
 import { ExternalVisitor } from "./externalTypes";
+import { Visitor } from "./visitor";
 
 export type PersonId = string;
 
 export class Visit {
   #date: Date;
-  #visitor: ExternalVisitor;
+  #visitor: Visitor;
   #droppedFractions: ReadonlyArray<DroppedFraction>;
 
   constructor(
     date: Date,
-    visitor: ExternalVisitor,
+    visitor: Visitor,
     droppedFractions: ReadonlyArray<DroppedFraction>,
   ) {
     this.#date = date;
@@ -23,7 +24,7 @@ export class Visit {
   }
 
   get personId() {
-    return this.#visitor.id;
+    return this.#visitor.personId;
   }
 
   get city() {

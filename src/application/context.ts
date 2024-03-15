@@ -1,9 +1,11 @@
 import { ExternalVisitorService } from "../domain/externalTypes";
+import { Visitors } from "../domain/visitor";
+import { InMemoryVisitors } from "../infrastructure/inMemoryVisitors";
 import { InMemoryPersonalVisitHistories } from "../infrastructure/inMemoryPersonalVisitHistories";
 import { PriceCalculators } from "../domain/PriceCalculation";
 
 export default class Context {
-  readonly externalVisitorService: ExternalVisitorService;
+  readonly visitors: Visitors;
   readonly personalVisitHistories: InMemoryPersonalVisitHistories;
   readonly priceCalculators: PriceCalculators;
 
@@ -11,9 +13,9 @@ export default class Context {
     externalVisitorService: ExternalVisitorService,
     priceCalculators: PriceCalculators,
   ) {
-    this.externalVisitorService = externalVisitorService;
     this.personalVisitHistories = new InMemoryPersonalVisitHistories();
     this.priceCalculators = priceCalculators;
+    this.visitors = new InMemoryVisitors(externalVisitorService);
   }
 
   // On every new scenario the context is initialized.

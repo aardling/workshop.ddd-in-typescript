@@ -1,5 +1,4 @@
 import { AllowedFractionType } from "../domain/droppedFraction";
-import { ExternalVisitor } from "../domain/externalTypes";
 import {
   PriceCalculator,
   PriceCalculatorDefinition,
@@ -10,6 +9,7 @@ import {
   priceKey,
 } from "../domain/PriceCalculation";
 import { PersonId } from "../domain/visit";
+import { Visitor } from "../domain/visitor";
 
 type VistorPriceKey = `${PersonId}-${string}`;
 
@@ -20,9 +20,9 @@ export class InMemoryPriceCalculators implements PriceCalculators {
   add(key: PriceKey, definition: PriceCalculatorDefinition) {
     this.#definitions[key] = definition;
   }
-  get(visitor: ExternalVisitor, fractionType: AllowedFractionType) {
+  get(visitor: Visitor, fractionType: AllowedFractionType) {
     const key = priceKey(visitor.city, visitor.type, fractionType);
-    const visitorPriceKey: VistorPriceKey = `${visitor.id}-${fractionType}`;
+    const visitorPriceKey: VistorPriceKey = `${visitor.personId}-${fractionType}`;
     let calculator = this.#calculators[visitorPriceKey];
     if (!calculator) {
       const definition = this.#definitions[key];

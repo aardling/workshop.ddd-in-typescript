@@ -4,6 +4,7 @@ import DroppedFraction, {
 } from "./droppedFraction";
 import { ExternalVisitor, ExternalVisitorType } from "./externalTypes";
 import Price from "./price";
+import { Visitor } from "./visitor";
 import Weight from "./weight";
 
 export interface PriceCalculator {
@@ -36,10 +37,7 @@ export type PriceCalculatorDefinition =
 
 export interface PriceCalculators {
   add: (key: PriceKey, calculatorDefinition: PriceCalculatorDefinition) => void;
-  get: (
-    visitor: ExternalVisitor,
-    fractionType: AllowedFractionType,
-  ) => PriceCalculator;
+  get: (visitor: Visitor, fractionType: AllowedFractionType) => PriceCalculator;
   save: (priceCalculator: PriceCalculator) => void;
 }
 
